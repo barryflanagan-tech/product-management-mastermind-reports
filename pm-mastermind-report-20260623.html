@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PM MasterMind — Outreach Timing Architecture (2026-06-23)</title>
+<style>
+  :root {
+    --bg: #0A192F;
+    --bg-card: #112240;
+    --bg-card-2: #0F2340;
+    --accent: #10B981;
+    --accent-soft: #064E3B;
+    --text: #E6EDF3;
+    --text-dim: #9CA3AF;
+    --border: #1F3450;
+    --warn: #F59E0B;
+    --danger: #EF4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    padding: 32px 24px;
+  }
+  .container { max-width: 980px; margin: 0 auto; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 32px; }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  h1 span { color: var(--accent); }
+  .meta { color: var(--text-dim); font-size: 14px; }
+  h2 { font-size: 20px; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h2 .badge { font-size: 12px; padding: 2px 8px; background: var(--accent-soft); color: var(--accent); border-radius: 4px; vertical-align: middle; margin-left: 8px; font-weight: 500; }
+  h3 { font-size: 16px; margin: 20px 0 8px; color: var(--accent); }
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+  .card.challenge { border-left: 4px solid var(--warn); }
+  .card.verdict { border-left: 4px solid var(--accent); }
+  p { margin-bottom: 12px; }
+  ul, ol { padding-left: 24px; margin-bottom: 12px; }
+  li { margin-bottom: 4px; }
+  strong { color: #fff; }
+  code { background: var(--bg-card-2); padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+  blockquote { border-left: 3px solid var(--accent); padding-left: 16px; color: var(--text-dim); font-style: italic; margin: 12px 0; }
+  details { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; }
+  details summary { padding: 14px 20px; cursor: pointer; font-weight: 600; user-select: none; display: flex; justify-content: space-between; align-items: center; }
+  details summary:hover { background: var(--bg-card-2); }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "▾"; color: var(--accent); font-size: 12px; }
+  details[open] summary::after { content: "▴"; }
+  details .content { padding: 0 20px 20px; border-top: 1px solid var(--border); }
+  .advisor { border-left: 3px solid var(--accent); padding-left: 16px; margin: 16px 0; }
+  .advisor.vote-a { border-left-color: #60A5FA; }
+  .advisor.vote-c { border-left-color: #F472B6; }
+  .vote-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+  .vote-tag.a { background: #1E3A8A; color: #93C5FD; }
+  .vote-tag.c { background: #831843; color: #F9A8D4; }
+  .grid {
+    display: grid;
+    grid-template-columns: 200px repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 16px 0 24px;
+    font-size: 13px;
+  }
+  .grid > div { background: var(--bg-card); padding: 10px 12px; }
+  .grid .h { background: var(--bg-card-2); font-weight: 600; color: var(--accent); }
+  .grid .cell.y { color: var(--accent); font-weight: 600; }
+  .grid .cell.n { color: var(--text-dim); }
+  .priority {
+    display: flex;
+    gap: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    padding: 16px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+  .priority .n { font-size: 24px; font-weight: 700; color: var(--accent); min-width: 32px; }
+  .one-thing {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 24px;
+    margin-top: 24px;
+  }
+  .one-thing h3 { color: var(--accent); margin-top: 0; }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--text-dim); font-size: 13px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>PM MasterMind — <span>Outreach Timing</span> Architecture</h1>
+  <div class="meta">BIA Feature G · 2026-06-23 · 7 advisors · 3 peer reviewers · 1 chairman</div>
+</header>
+
+<h2>The Challenge</h2>
+<div class="card challenge">
+  <p>BIA shipped Feature G — "Outreach Timing Windows" — as a free wedge for 5 future list-building features. 72 personas × ~8 trigger cards each (576 total). Each card: Day 0 anchor, optimal day range, why-this-window, too-early / too-late, and a "Recommended move."</p>
+  <p>Founder Barry caught after ship that the "Recommended moves" hallucinate product-specific framings (e.g., "OCC examination readiness brief authored by a former OCC examiner on your advisory board" / "FIS Horizon certified integration case study") that mislead any seller whose product doesn't match. 576 cards live in production.</p>
+  <p><strong>Parallel persistent bug:</strong> Cards refer to personas by character names ("Riley", "Sarah") instead of role ("the Banking CIO"). Flagged repeatedly across features.</p>
+  <p><strong>Three options on the table:</strong></p>
+  <ul>
+    <li><strong>A — Strip product specifics.</strong> Shape-only moves. ~$1.40 regen. Stays free/static/instant.</li>
+    <li><strong>B — Dynamic paid per-user.</strong> $0.02/view, 8–15s, becomes paid.</li>
+    <li><strong>C — Hybrid.</strong> Static scaffold + live one-line move using <code>productContext</code>. $0.01/view cached.</li>
+  </ul>
+</div>
+
+<h2>Council Verdict <span class="badge">Chairman</span></h2>
+<div class="card verdict">
+
+  <h3>Where the MasterMind Agrees</h3>
+  <p>Despite the surface 4–3 vote (A vs C), <strong>7 of 7 advisors converged on the same diagnosis:</strong> the team shipped 576 cards with no telemetry, no validated activation event, and Barry as the only test surface. The architecture debate is downstream of the discovery debate.</p>
+  <ul>
+    <li><strong>You have no chain of evidence.</strong> Tharin: "Option A doesn't lack telemetry because it's static — it lacks telemetry because nobody wired it." Lenny: "Do you have a retention curve for ANY free surface?"</li>
+    <li><strong>Activation event is unvalidated.</strong> Is the aha moment viewing the card or running the play? No one has answered this.</li>
+    <li><strong>The character-name leak is a process gap.</strong> Perri: "Recurring across features = no systemic learning loop." A template lint / persona schema gate fixes it; A/B/C does not.</li>
+    <li><strong>Fix Riley/role first, regardless of architecture path.</strong></li>
+    <li><strong>This pattern propagates to 5 future features.</strong> The discovery and instrumentation contract set here will set the precedent for C, E, F, B.</li>
+  </ul>
+
+  <h3>Where the MasterMind Clashes</h3>
+  <p>The 4–3 split maps to a deeper disagreement about which loop matters most:</p>
+  <ul>
+    <li><strong>A camp</strong> (Verna, Perri, Torres, Tharin): The wedge function depends on <em>shareability and trust</em>. A canonical artifact requires a universal form. Per-user personalization breaks the artifact, kills shareability, and pre-$15M ARR makes any meter on a wedge = PLS-too-early.</li>
+    <li><strong>C camp</strong> (Lenny, Bush, Cagan): The wedge function depends on <em>behavior change</em>. Shape-only is PLG 1.0 regression — forces the AE to translate. C makes <code>productContext</code> load-bearing, which is also the upgrade hook.</li>
+  </ul>
+  <p>Until BIA measures both shareability and behavior change, this argument can't be resolved.</p>
+
+  <h3>Blind Spots Peer Review Caught</h3>
+  <ol>
+    <li><strong>Trust blast radius.</strong> 576 cards with fabricated product claims are live to paying users — customer-trust incident, not just architecture. No advisor proposed in-app changelog or user heads-up.</li>
+    <li><strong>The Riley/role bug is a generation-pipeline integrity signal.</strong> Same pipeline produced all 576 cards. Has anyone validated the WINDOWS themselves — Day 0 anchors, day ranges, rationale? The moat is unaudited.</li>
+    <li><strong>Verna's "Growth Engine" thesis is unevidenced.</strong> "Shareable B2B asset" was pattern-matched onto a feature with zero observed sharing behavior.</li>
+  </ol>
+
+  <h3>Priority Fixes</h3>
+  <div class="priority"><div class="n">1</div><div><strong>Ship Option A today as the tourniquet</strong> — but only after fixing the character-name leak and adding a single in-app instrumentation event. Regenerate all 72 timing files with a prompt that forbids (a) character first names, (b) named product examples, (c) seller-side capability claims. Anchor every Recommended move to a buyer-side artifact. ~$1.40, ~5 min.</div></div>
+  <div class="priority"><div class="n">2</div><div><strong>Add a template-review gate before merging any persona-touching generator.</strong> Define the persona-rendering contract and enforce it as a generation-time guardrail. Stops the next 5 features from shipping the same class of bug.</div></div>
+  <div class="priority"><div class="n">3</div><div><strong>Run a 48-hour qualitative test before committing to Option C.</strong> Strip 10 cards manually, show 5 AEs stripped + 5 current, ask "what would you do with this?" In parallel, flag-test draft C to 20 users. Decide on C in 30 days based on data.</div></div>
+
+  <div class="one-thing">
+    <h3>The One Thing to Do First</h3>
+    <p>Rewrite the <code>generate-timing-windows.js</code> prompt with three explicit constraints: (a) role only, never character names, (b) no product specifics or vendor capability claims, (c) anchor every Recommended move to a buyer-side artifact (MRA timeline, asset tier peer reference, regulatory milestone). Regenerate all 72 files. Deploy. Stops both bugs in one pass. Then wire the telemetry hook.</p>
+  </div>
+</div>
+
+<h2>Advisor Convergence</h2>
+<div class="grid">
+  <div class="h">Theme</div>
+  <div class="h">A camp</div>
+  <div class="h">C camp</div>
+  <div class="h">Universal</div>
+  <div class="h">Unique</div>
+
+  <div><strong>No telemetry / chain of evidence</strong></div>
+  <div class="cell y">Verna · Perri · Torres · Tharin</div>
+  <div class="cell y">Lenny · Cagan</div>
+  <div class="cell y">6/7</div>
+  <div class="cell n">—</div>
+
+  <div><strong>Activation event undefined</strong></div>
+  <div class="cell y">Tharin</div>
+  <div class="cell y">Lenny · Bush · Cagan</div>
+  <div class="cell y">4/7</div>
+  <div class="cell n">—</div>
+
+  <div><strong>Fix Riley/role bug first</strong></div>
+  <div class="cell y">Verna · Perri</div>
+  <div class="cell y">Bush · Cagan</div>
+  <div class="cell y">4/7</div>
+  <div class="cell n">—</div>
+
+  <div><strong>Build Trap diagnosis</strong></div>
+  <div class="cell y">Perri · Tharin</div>
+  <div class="cell y">Cagan</div>
+  <div class="cell n">3/7</div>
+  <div class="cell n">—</div>
+
+  <div><strong>Discovery / opportunity space</strong></div>
+  <div class="cell y">Torres</div>
+  <div class="cell n">—</div>
+  <div class="cell n">1/7</div>
+  <div class="cell y">Torres</div>
+
+  <div><strong>Shareability / Growth Engine</strong></div>
+  <div class="cell y">Verna</div>
+  <div class="cell n">—</div>
+  <div class="cell n">1/7</div>
+  <div class="cell y">Verna (contested)</div>
+
+  <div><strong>PLG 1.0 vs 2.0 regression</strong></div>
+  <div class="cell n">—</div>
+  <div class="cell y">Bush · Cagan</div>
+  <div class="cell n">2/7</div>
+  <div class="cell y">Bush</div>
+
+  <div><strong>PLS-too-early at pre-$15M ARR</strong></div>
+  <div class="cell y">Tharin</div>
+  <div class="cell n">—</div>
+  <div class="cell n">1/7</div>
+  <div class="cell y">Tharin</div>
+</div>
+
+<h2>Advisor Responses</h2>
+
+<details><summary>Lenny Rachitsky — Retention/Loop <span class="vote-tag c">votes C</span></summary>
+<div class="content advisor vote-c">
+<p>Stop. Before picking A/B/C, answer this: do you have a retention curve for any existing free surface? Podcasts, Buyer Intel Docs — what's the W2/W4 return rate? If you don't know, you're flying blind on this entire decision.</p>
+<p><strong>The activation event isn't "viewing a card." It's "running a play and reporting back."</strong> A timing window the user never acts on is a vanity activation — same failure mode as a dashboard nobody opens twice. The question is whether Feature G creates a <em>loop</em>: see card → send the move → trigger fires or doesn't → come back to log/learn/iterate. None of A/B/C addresses the loop.</p>
+<p><strong>Retention risk ranking:</strong> A is highest. Shape-only moves are the exact generic advice experienced AEs already ignore. They'll view once, shrug, never return. That's your leaky bucket. B is lowest retention risk but worst activation friction. C is the only one that preserves instant + specific + free-feeling.</p>
+<p><strong>Ship C.</strong> Instrument it for the loop, not the view. Cache by user-product-persona-trigger, fix the Riley/Sarah role bug in the same regen, add a "did you run this?" check-back the following week. Talk to 5 AEs who viewed a card 7 days ago. If &lt;40% acted, it's a PMF problem on the wedge, not a regen problem.</p>
+</div></details>
+
+<details><summary>Elena Verna — Racecar / Growth Engine <span class="vote-tag a">votes A</span></summary>
+<div class="content advisor vote-a">
+<p>Option A. Strip the product specifics. Ship shape-only moves.</p>
+<p>Racecar read: the 576 cards are a <strong>Growth Engine candidate</strong> — content-driven acquisition loop. Shareable artifact + structured proprietary data + screenshot-native format = compounding loop substrate.</p>
+<p>Option B kills the engine to chase ARPU. Per-user dynamic = no canonical artifact to share. Converts a compounding loop into a Turbo Boost. It's <strong>Fake PLG</strong> — paywalls the acquisition surface.</p>
+<p>Option C inherits B's flaw: the Recommended move <em>is</em> the screenshot-worthy line. Personalize it and shareability collapses.</p>
+<p>Option A keeps the engine intact. Shape-only moves — "Send a regulator-aligned readiness brief positioned around your differentiated control" — are honest, universal, and screenshottable. Product-specific layer belongs in <em>paid</em> surfaces (Positioning Playbook, Cold Email Sequence). Fix the "Riley" naming bug in the same pass. Engine integrity is non-negotiable.</p>
+</div></details>
+
+<details><summary>Wes Bush — PLG / Time-to-Value <span class="vote-tag c">votes C</span></summary>
+<div class="content advisor vote-c">
+<p>The Aha moment is #3 — acting on the Recommended move. Everything upstream is scaffolding.</p>
+<p>Option A is <strong>Fake PLG</strong>. Stops one step before the activation event and asks the user to translate. "Lead with peer reference matching asset tier" is PLG 1.0 — the user does the synthesis. You moved the hallucination problem onto the user.</p>
+<p>Option B violates the Halving Principle on a surface that's currently instant. 8-15s on a free wedge feature trains users that the product is slow before they've experienced value.</p>
+<p>Option C. Genuine PLG 2.0. Static scaffolding preserves instant TTV. The Recommended move regenerates once per user-product-persona-trigger and caches forever. AI does the translation work, at $0.01 amortized.</p>
+<p>Two conditions: (1) Fix the Riley/role leak first. (2) Pre-warm the cache for the user's top 3 personas during onboarding completion. Don't make activation wait on a cold cache.</p>
+</div></details>
+
+<details><summary>Melissa Perri — Build Trap <span class="vote-tag a">votes A</span></summary>
+<div class="content advisor vote-a">
+<p><strong>Yes, BIA is in the Build Trap on Feature G.</strong> 576 cards shipped, hallucinations caught by the founder <em>after</em> production — that's not discovery, that's QA-by-Barry. Measured output (cards generated), not outcome (does the seller act?).</p>
+<p><strong>The recurring character-name bug is the louder signal.</strong> No systemic learning loop, no shared definition of "done," no pre-ship checklist that encodes prior founder feedback. Textbook Product Death Cycle.</p>
+<p><strong>Option C is the seductive build-trap answer.</strong> More infrastructure feels like progress, but you're scaling a feature whose outcome you haven't validated.</p>
+<p><strong>Pick A.</strong> $1.40 regen, ships today, stops the bleeding, lets you run the actual experiment: <em>do sellers report that timing windows changed their outreach behavior?</em> Instrument one question in-app after card view. If &lt;20% say yes, no version of B or C matters.</p>
+</div></details>
+
+<details><summary>Teresa Torres — Discovery / Opportunity Solution Tree <span class="vote-tag a">votes A (as tourniquet)</span></summary>
+<div class="content advisor vote-a">
+<p>You're choosing between three solutions without an opportunity map.</p>
+<p>What's the outcome? Is Outreach Timing supposed to drive return visits, screenshot loops, or trust in the data layer? Each points to a different option. You haven't named the outcome, so you can't rank the options.</p>
+<p>The opportunity space is unmapped. "I don't know when to call" wants Day 0 + window. "I don't know what to say without burning the relationship" wants the Recommended move. "I don't want to look stupid screenshotting this" wants shape-only. Three different unmet needs, three different winners.</p>
+<p>Cheapest experiment: Strip 10 cards (1 hour, zero cost). Show 5 AEs the stripped version and 5 the current version. Ask: "What would you do with this?" Know in 48 hours.</p>
+<p>Pick A now as the bug-fix tourniquet — hallucinations on a trust surface are bleeding. Then run the interview before committing engineering to B or C.</p>
+</div></details>
+
+<details><summary>Marty Cagan — Four Big Risks <span class="vote-tag c">votes C with guardrails</span></summary>
+<div class="content advisor vote-c">
+<p><strong>Pick C. But not for the reasons Barry's framing suggests.</strong></p>
+<p>The Four Big Risks expose the real problem: nobody validated <em>Value</em> before committing 576 cards. Feature Factory. Barry's own post-ship "this feels wrong" is the only data point. One PM, one tester, zero discovery.</p>
+<p><strong>Value:</strong> A is honest but generic. C wins on value <em>if</em> productContext is rich enough. Untested.<br>
+<strong>Usability:</strong> A makes the AE do the translation. C reduces friction at the moment of action.<br>
+<strong>Feasibility:</strong> C's cache invalidation is real but bounded.<br>
+<strong>Viability:</strong> Keep the wedge free. Grounded Recommended move is the upgrade hook — requires onboarding (productContext), which deepens activation.</p>
+<p><strong>Verdict:</strong> Ship C behind a flag to 20 users. Measure: did they act on the move? Kill the character-name leak first. Missionary, not mercenary.</p>
+</div></details>
+
+<details><summary>Leah Tharin — PLG/PLS architecture / Instrumentation <span class="vote-tag a">votes A</span></summary>
+<div class="content advisor vote-a">
+<p>Pick A — with non-negotiable instrumentation built before the next card ships.</p>
+<p>You're treating "free vs paid" as the decision when the actual decision is "do you have a chain of evidence from card-open to simulator-entry to credit-burn." Right now you have none. Option A doesn't lack telemetry because it's static — it lacks telemetry because nobody wired it.</p>
+<p><strong>Five events to wire:</strong> card opened, time-on-card, copy-clicked, "Open in Simulator" clicked, simulator session within 30min of card view, persona-match between card and session.</p>
+<p>Option C is seductive because per-view generation logs itself by construction — but that's lazy instrumentation dressed up as product strategy. The moment you meter it, you've built a soft paywall at pre-$15M ARR. Textbook PLS-too-early.</p>
+<p>Define the activation event as <strong>simulator session opened from a card within 30 minutes, same persona</strong>. Re-evaluate in 30 days. If cards drive simulator entry, you've got your wedge. If not, no personalization saves it.</p>
+</div></details>
+
+<h2>Peer Review Highlights</h2>
+
+<details><summary>Reviewer 1 — Tharin's instrumentation spec is the only executable answer</summary>
+<div class="content">
+<p><strong>Strongest:</strong> Tharin (G). Only response that names the actual operational gap: no instrumented chain. Five named events and the "simulator session within 30min" activation definition are executable Monday. "PLS-too-early at pre-$15M ARR" is the sharpest constraint anyone named.</p>
+<p><strong>Biggest blind spot:</strong> Verna (B). Treats 576 cards as a viral artifact engine without a shred of evidence sellers screenshot/share BIA content today.</p>
+<p><strong>All 7 missed:</strong> The Riley/role bug across multiple features. The actual signal: BIA has no shared persona-rendering contract. Fix isn't A/B/C — it's a template lint + persona schema enforced before any persona-touching feature merges.</p>
+</div></details>
+
+<details><summary>Reviewer 2 — Trust blast radius is the missing dimension</summary>
+<div class="content">
+<p><strong>Strongest:</strong> Tharin (G). Only response that names the actual decision: no instrumentation, so A/B/C is unanswerable.</p>
+<p><strong>Biggest blind spot:</strong> Verna (B). Treats 576 cards as a "Growth Engine" asset without acknowledging the cards are <em>factually wrong</em>. Hallucinated OCC advisors and FIS integrations aren't a shareability moat — they're a credibility risk if a banking AE screenshots one. Shareability of broken artifacts is negative compounding.</p>
+<p><strong>All 7 missed: trust blast radius.</strong> 576 cards shipped free to paying users contain fabricated product claims. None of the seven asked: who saw them, did anyone act on a hallucinated card with a real prospect, what's the disclosure obligation?</p>
+</div></details>
+
+<details><summary>Reviewer 3 — Torres refused the frame; the windows themselves are unaudited</summary>
+<div class="content">
+<p><strong>Strongest:</strong> Torres (E). Only response that refuses the frame. Everyone else picks a solution; E points out you're choosing between three answers without naming the outcome.</p>
+<p><strong>Biggest blind spot:</strong> Verna (B). Right that 576 cards are a distribution asset, but treats "shareable artifact" as proven when zero evidence exists.</p>
+<p><strong>All 7 missed:</strong> The Riley/character-name leak is a trust-and-safety incident on a paid product, not a parallel bug. If hallucinated names are leaking, the same generation pipeline produced the 576 cards under debate — meaning the artifact's credibility is already compromised before A/B/C matters. Nobody asked: <em>are the 576 cards correct?</em></p>
+</div></details>
+
+<footer>
+  PM MasterMind · BIA Feature G · 2026-06-23<br>
+  7 advisors · Lenny Rachitsky · Elena Verna · Wes Bush · Melissa Perri · Teresa Torres · Marty Cagan · Leah Tharin
+</footer>
+
+</div>
+</body>
+</html>
